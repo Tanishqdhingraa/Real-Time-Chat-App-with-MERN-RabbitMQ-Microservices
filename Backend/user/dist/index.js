@@ -3,10 +3,12 @@ import dotenv from "dotenv";
 import { connectDb } from "./config/db.js";
 import { createClient } from "redis";
 import userRoutes from "./routes/user.js";
+import { connectRabbitMq } from "./config/rabbitmq.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 connectDb();
+connectRabbitMq();
 //ROUTES 
 app.use('api/v1', userRoutes);
 /////////////REDIS WORKING ///////////////
@@ -30,6 +32,6 @@ app.get("/", (req, res) => {
     res.send("ITS WORKING CORRECTLY");
 });
 app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
+    console.log(`❤️  Server is running at http://localhost:${PORT}`);
 });
 //# sourceMappingURL=index.js.map
