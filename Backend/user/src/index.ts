@@ -1,0 +1,49 @@
+import express from "express";
+import dotenv from "dotenv";
+import { connectDb } from "./config/db.js";
+import { createClient } from "redis";
+
+import userRoutes from "./routes/user.js"
+
+dotenv.config();
+const app = express();
+
+const PORT = process.env.PORT || 3000;
+
+connectDb();
+
+//ROUTES 
+app.use('api/v1',userRoutes);
+
+
+
+/////////////REDIS WORKING ///////////////
+if (!process.env.REDIS_URL) {
+  throw new Error("REDIS_URL is missing in .env");
+}
+
+export const redisclient = createClient({
+  url: process.env.REDIS_URL,
+});
+
+// 🔥 Show proper errors instead of crashing your app
+redisclient.on("error", (err) => {
+  console.error("❌ Redis Connection Error:", err.message);
+});
+
+// ✅ Proper connect with correct logging
+redisclient
+  .connect()
+  .then(() => console.log("✅ Redis Connected Successfully"))
+  .catch((err) => console.error("❌ Redis Connect Failed:", err));
+
+///////////////////////////////////////////////////////////////
+
+ 
+app.get("/", (req, res) => {
+  res.send("ITS WORKING CORRECTLY");
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running at http://localhost:${PORT}`);
+});
