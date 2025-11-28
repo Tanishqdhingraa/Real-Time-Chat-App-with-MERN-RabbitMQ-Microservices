@@ -12,7 +12,7 @@ export const connectDb = async () => {
         await mongoose.connect(url, {
             dbName: "CHAT-APPLICATION"
         });
-        console.log("Connected to database");
+        console.log("😘 Connected to database");
 
     } catch (error) {
         console.log("some error in database connection");
