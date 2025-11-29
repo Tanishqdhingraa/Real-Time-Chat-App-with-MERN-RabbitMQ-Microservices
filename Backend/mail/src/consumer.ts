@@ -15,29 +15,44 @@ export const startsentoptcosnumer = async () => {
     });
 
     const channel = await connection.createChannel();
-
     const queueName = "send-otp";
 
     await channel.assertQueue(queueName, { durable: true });
 
-    console.log("✅ Mail service consumer started and listending for otp emails");
-    
-    channel.consume(queueName,async(msg)=>{
-        if(msg){
-           try {
-            const {to, string, body}=JSON.parse(msg.content.toString());
+    console.log("✅ Mail service consumer started and listening for OTP emails");
 
-            const transporter = nodemailer.createTransport({
-                
-            })
-           } catch (error) {
-            
-           } 
-        }
-    })
+    channel.consume(queueName, async (msg) => {
+      if (!msg) return;
+
+      try {
+        const { to, subject, body } = JSON.parse(msg.content.toString());
+
+        // ✔ Correct Gmail SMTP configuration
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: {
+            user: process.env.MAIL_USER,      // your email
+            pass: process.env.MAIL_PASSWORD,  // your app password
+          },
+        });
+
+        await transporter.sendMail({
+          from: process.env.MAIL_USER,  // sender email
+          to: to,
+          subject: subject,
+          text:body,
+        });
+
+        console.log("📩 OTP Email Sent To:", to);
+
+        channel.ack(msg);
+
+      } catch (error) {
+        console.log("❌ Error sending mail:", error);
+      }
+    });
 
   } catch (error) {
     console.log("FAILED TO START THE CONSUMER IN RABBITMQ");
   }
 };
- 

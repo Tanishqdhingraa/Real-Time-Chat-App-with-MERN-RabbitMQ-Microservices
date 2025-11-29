@@ -9,13 +9,15 @@ import { connectRabbitMq } from "./config/rabbitmq.js";
 dotenv.config();
 const app = express();
 
+app.use(express.json());
+
 const PORT = process.env.PORT || 3000;
 
 connectDb();
 connectRabbitMq();
 
 //ROUTES 
-app.use('api/v1',userRoutes);
+app.use('/api/v1',userRoutes);
 
 
 
@@ -43,9 +45,9 @@ redisclient
 
  
 app.get("/", (req, res) => {
-  res.send("ITS WORKING CORRECTLY");
+  res.send("ITS WORKING  CORRECTLY");
 });
 
 app.listen(PORT, () => {
-  console.log(`❤️  Server is running at http://localhost:${PORT}`);
+  console.log(`❤️  Server of user-service  is running at http://localhost:${PORT}`);
 });
