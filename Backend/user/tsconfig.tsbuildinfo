@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/config/trycatch.ts","./src/config/db.ts","./src/config/generatetoken.ts","./src/config/rabbitmq.ts","./src/controllers/user.ts","./src/middleware/isauth.ts","./src/model/user.ts","./src/routes/user.ts"],"errors":true,"version":"5.9.3"}
