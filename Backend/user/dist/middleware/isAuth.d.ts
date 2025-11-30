@@ -1,7 +1,6 @@
-import type { Request, Response, NextFunction } from "express";
-import type { IUser } from "../model/User.js";
+import { Request, Response, NextFunction } from "express";
 export interface AuthenticateRequest extends Request {
-    user?: IUser | null;
+    user?: any;
 }
-export declare const isAuth: (req: AuthenticateRequest, res: Response, next: NextFunction) => void;
+export declare const isAuth: (req: AuthenticateRequest, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
 //# sourceMappingURL=isAuth.d.ts.map

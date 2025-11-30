@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import { connectDb } from "./config/db.js";
 import { createClient } from "redis";
-
+import cors from 'cors'
 import userRoutes from "./routes/user.js"
 import { connectRabbitMq } from "./config/rabbitmq.js";
 
@@ -10,6 +10,7 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
+app.use(cors())
 
 const PORT = process.env.PORT || 3000;
 

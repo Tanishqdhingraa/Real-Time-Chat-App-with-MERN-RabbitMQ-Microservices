@@ -103,4 +103,47 @@ export const myProfile = TryCatch(async(req: AuthenticateRequest, res)=>{
   const user = req.user;
 
   res.json(user);
+}) 
+
+export const UpdateYourname = TryCatch(async (req: AuthenticateRequest, res) => {
+  const userId = req.user?._id;
+
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized, login required" });
+  }
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const { name } = req.body;
+
+  if (!name || name.trim() === "") {
+    return res.status(400).json({ message: "Name is required" });
+  }
+
+  user.name = name;
+  await user.save();
+
+  const token = generateToken(user);
+
+  return res.status(200).json({
+    message: "User updated successfully",
+    user,
+    token,
+  });
+});
+
+
+export const getAllUser = TryCatch(async(req:AuthenticateRequest,res)=>{
+  const users = await User.find();
+
+  res.json(users);
 })
+
+export const getAUser = TryCatch(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  res.json(user);
+});

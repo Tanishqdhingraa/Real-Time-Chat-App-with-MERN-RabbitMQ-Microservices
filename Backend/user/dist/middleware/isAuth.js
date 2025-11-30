@@ -1,30 +1,24 @@
 import jwt from "jsonwebtoken";
-const rawSecret = process.env.JWT_SECRET;
-if (!rawSecret) {
-    throw new Error("JWT_SECRET missing in .env");
-}
-const JWT_SECRET = rawSecret; // ✔ TS now knows it's ALWAYS a string
 export const isAuth = (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            res.status(401).json({ message: "Please login - Missing token" });
-            return;
+            return res.status(401).json({ message: "Unauthorized: No token provided" });
         }
         const token = authHeader.split(" ")[1];
-        const decoded = jwt.verify(token, JWT_SECRET);
-        if (!decoded || !decoded.id) {
-            res.status(401).json({ message: "Invalid token" });
-            return;
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized: Invalid token" });
         }
-        req.user = {
-            _id: decoded.id,
-            email: decoded.email,
-        };
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            throw new Error("JWT secret is missing in environment variables");
+        }
+        const decoded = jwt.verify(token, secret);
+        req.user = decoded; // now works with AuthenticateRequest
         next();
     }
     catch (error) {
-        res.status(401).json({ message: "JWT verification failed" });
+        return res.status(401).json({ message: "Unauthorized", error });
     }
 };
 //# sourceMappingURL=isAuth.js.map
