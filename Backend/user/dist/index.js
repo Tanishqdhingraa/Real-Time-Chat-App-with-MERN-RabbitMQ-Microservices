@@ -14,23 +14,46 @@ connectDb();
 connectRabbitMq();
 //ROUTES 
 app.use('/api/v1', userRoutes);
-/////////////REDIS WORKING ///////////////
+// ---------------- REDIS INITIALIZATION ---------------- //
 if (!process.env.REDIS_URL) {
-    throw new Error("REDIS_URL is missing in .env");
+    console.error("❌ FATAL: REDIS_URL is missing in your environment variables.");
+    throw new Error("Environment variable REDIS_URL is required but not found.");
 }
 export const redisclient = createClient({
     url: process.env.REDIS_URL,
 });
-// 🔥 Show proper errors instead of crashing your app
+// Log all Redis-level errors
 redisclient.on("error", (err) => {
-    console.error("❌ Redis Connection Error:", err.message);
+    console.error("🚨 [Redis Error]", {
+        message: err.message,
+        stack: err.stack,
+        code: err.code,
+    });
 });
-// ✅ Proper connect with correct logging
+// More useful connection logs
+redisclient.on("connect", () => {
+    console.log("🔄 Attempting to connect to Redis...");
+});
+redisclient.on("ready", () => {
+    console.log("✅ Redis is ready and operational.");
+});
+redisclient.on("reconnecting", () => {
+    console.warn("♻️ Redis reconnecting...");
+});
+redisclient.on("end", () => {
+    console.warn("🔌 Redis connection closed.");
+});
+// ----------- CONNECT TO REDIS WITH DEBUG LOGGING ---------- //
 redisclient
     .connect()
-    .then(() => console.log("✅ Redis Connected Successfully"))
-    .catch((err) => console.error("❌ Redis Connect Failed:", err));
-///////////////////////////////////////////////////////////////
+    .then(() => console.log("🎉 Redis Connected Successfully!\n"))
+    .catch((err) => {
+    console.error("❌ Redis Connection Failed:", {
+        message: err.message,
+        stack: err.stack,
+        code: err.code,
+    });
+});
 app.get("/", (req, res) => {
     res.send("ITS WORKING  CORRECTLY");
 });
