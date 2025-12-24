@@ -1,1 +1,1 @@
-{"version":3,"file":"Chat.js","sourceRoot":"","sources":["../../src/models/Chat.ts"],"names":[],"mappings":""}
+{"version":3,"file":"Chat.js","sourceRoot":"","sources":["../../src/models/Chat.ts"],"names":[],"mappings":"AAAA,OAAO,QAAQ,EAAE,EAAY,MAAM,EAAC,MAAM,UAAU,CAAC;AAarD,MAAM,MAAM,GAAiB,IAAI,MAAM,CACnC;IACI,KAAK,EAAC,CAAC,EAAC,IAAI,EAAC,MAAM,EAAG,QAAQ,EAAC,IAAI,EAAC,CAAC;IACrC,aAAa,EAAC;QACV,IAAI,EAAC,MAAM;QACX,QAAQ,EAAE,IAAI;KACjB;CACJ,EAAC;IACE,UAAU,EAAC,IAAI;CAClB,CACJ,CAAA;AAED,MAAM,CAAC,MAAM,IAAI,GAAG,QAAQ,CAAC,KAAK,CAAQ,MAAM,EAAC,MAAM,CAAC,CAAC"}

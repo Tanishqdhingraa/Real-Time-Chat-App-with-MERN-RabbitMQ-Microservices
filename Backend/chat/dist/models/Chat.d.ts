@@ -1,2 +1,16 @@
-export {};
+import mongoose, { Document } from "mongoose";
+export interface IChat extends Document {
+    users: string[];
+    latestmessage: {
+        text: string;
+        sender: string;
+    };
+    createdAt: Date;
+    UpdatedAt: Date;
+}
+export declare const Chat: mongoose.Model<IChat, {}, {}, {}, mongoose.Document<unknown, {}, IChat, {}, mongoose.DefaultSchemaOptions> & IChat & Required<{
+    _id: mongoose.Types.ObjectId;
+}> & {
+    __v: number;
+}, any, IChat>;
 //# sourceMappingURL=Chat.d.ts.map
