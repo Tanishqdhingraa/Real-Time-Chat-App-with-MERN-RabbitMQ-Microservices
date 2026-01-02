@@ -32,29 +32,7 @@ A scalable **real-time chat application** built using **MERN stack (MongoDB, Exp
 
 ---
 
-## 🏗️ Architecture
 
-
-
-       +-----------------+
-       |     Client      |
-       |  (React Frontend) |
-       +--------+--------+
-                |
-       -------------------
-       | Web / REST API  |
-       -------------------
-        |             |
-  +-----v-----+   +---v---+
-  | UserSvc   |   | MailSvc|
-  | (Auth)    |   | (Email)|
-  +-----------+   +-------+
-        |
-        v
-  +-----------+
-  | ChatSvc   |
-  | (WebSocket)|
-  +-----------+
 
 - **User Service:** Handles authentication, JWT, OTP
 - **Mail Service:** Sends emails asynchronously via RabbitMQ
