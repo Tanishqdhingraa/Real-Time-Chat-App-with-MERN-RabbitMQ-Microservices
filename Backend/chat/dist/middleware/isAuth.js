@@ -17,8 +17,14 @@ export const isAuth = async (req, res, next) => {
         if (!secret) {
             throw new Error("JWT secret is missing in environment variables");
         }
+        // ✅ Decode the JWT payload
         const decoded = jwt.verify(token, secret);
-        req.user = decoded;
+        // ✅ Map the payload to match IUser interface
+        req.user = {
+            _id: decoded.id, // required by IUser
+            name: decoded.name || "", // optional fallback
+            email: decoded.email,
+        };
         next();
     }
     catch (error) {

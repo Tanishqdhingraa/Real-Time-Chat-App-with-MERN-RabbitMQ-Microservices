@@ -2,11 +2,12 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { Document } from "mongoose";
 
-interface IUser extends Document {
-//   _id: Types.ObjectId;
+export interface IUser extends Document<string> {
+  _id: string;
   name: string;
   email: string;
 }
+
 
 export interface AuthenticatedRequest extends Request {
   user?: IUser | null;
@@ -35,14 +36,20 @@ export const isAuth = async (
     }
 
     const secret = process.env.JWT_SECRET;
-
     if (!secret) {
       throw new Error("JWT secret is missing in environment variables");
     }
 
-    const decoded = jwt.verify(token, secret) as IUser;
+    // ✅ Decode the JWT payload
+    const decoded = jwt.verify(token, secret) as { id: string; name?: string; email: string };
 
-    req.user = decoded;
+    // ✅ Map the payload to match IUser interface
+    req.user = {
+      _id: decoded.id,       // required by IUser
+      name: decoded.name || "", // optional fallback
+      email: decoded.email,
+    } as IUser;
+
     next();
   } catch (error) {
     res.status(401).json({ message: "Unauthorized" });

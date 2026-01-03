@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { Document } from "mongoose";
-interface IUser extends Document {
+export interface IUser extends Document<string> {
+    _id: string;
     name: string;
     email: string;
 }
