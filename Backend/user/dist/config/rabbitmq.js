@@ -1,25 +1,24 @@
-import amqp from "amqplib";
+import amql from "amqplib";
 let channel;
-export const connectRabbitMq = async () => {
+export const connectRabbitMQ = async () => {
     try {
-        const connection = await amqp.connect({
+        const connection = await amql.connect({
             protocol: "amqp",
-            hostname: process.env.RABBITMQ_HOST,
+            hostname: process.env.Rabbitmq_Host,
             port: 5672,
-            username: process.env.RABBITMQ_USER,
-            password: process.env.RABBITMQ_PASSWORD,
+            username: process.env.Rabbitmq_Username,
+            password: process.env.Rabbitmq_Password,
         });
         channel = await connection.createChannel();
-        console.log("👌 Connected to RabbitMQ and channel created");
-        return channel;
+        console.log("✅ connected to rabbitmq");
     }
     catch (error) {
-        console.error("Failed to connect to RabbitMQ", error);
+        console.log("Failed to connect to rabbitmq", error);
     }
 };
-export const publishtoQueue = async (queueName, message) => {
+export const publishToQueue = async (queueName, message) => {
     if (!channel) {
-        console.log("RABBITMQ CHANNEL IS NOT INITIALIZED");
+        console.log("Rabbitmq channel is not initalized");
         return;
     }
     await channel.assertQueue(queueName, { durable: true });
@@ -27,4 +26,3 @@ export const publishtoQueue = async (queueName, message) => {
         persistent: true,
     });
 };
-//# sourceMappingURL=rabbitmq.js.map

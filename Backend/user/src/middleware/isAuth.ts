@@ -1,37 +1,46 @@
-import jwt from "jsonwebtoken";
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
+import { IUser } from "../model/User.js";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
-// ⬅️ Add and export this interface
-export interface AuthenticateRequest extends Request {
-  user?: any;  // or jwt.JwtPayload
+export interface AuthenticatedRequest extends Request {
+  user?: IUser | null;
 }
 
-export const isAuth = (req: AuthenticateRequest, res: Response, next: NextFunction) => {
+export const isAuth = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Unauthorized: No token provided" });
+      res.status(401).json({
+        message: "Please Login - No auth header",
+      });
+      return;
     }
 
     const token = authHeader.split(" ")[1];
 
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    const decodedValue = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    ) as JwtPayload;
+
+    if (!decodedValue || !decodedValue.user) {
+      res.status(401).json({
+        message: "Invalid token",
+      });
+      return;
     }
 
-    const secret = process.env.JWT_SECRET;
+    req.user = decodedValue.user;
 
-    if (!secret) {
-      throw new Error("JWT secret is missing in environment variables");
-    }
-
-    const decoded = jwt.verify(token, secret);
-
-    req.user = decoded; // now works with AuthenticateRequest
     next();
-
   } catch (error) {
-    return res.status(401).json({ message: "Unauthorized", error });
+    res.status(401).json({
+      message: "Please Login - JWT error",
+    });
   }
 };

@@ -1,57 +1,46 @@
+import axios from "axios";
 import TryCatch from "../config/TryCatch.js";
 import { Chat } from "../models/Chat.js";
 import { Messages } from "../models/Messages.js";
-import axios from "axios";
+import { getRecieverSocketId, io } from "../config/socket.js";
 export const createNewChat = TryCatch(async (req, res) => {
-    // 🔐 requester MUST be logged in
-    if (!req.user || !req.user._id) {
-        return res.status(401).json({
-            message: "User not authenticated",
-        });
-    }
-    const userId = req.user._id;
+    const userId = req.user?._id;
     const { otherUserId } = req.body;
     if (!otherUserId) {
-        return res.status(400).json({
-            message: "Other userId is required",
+        res.status(400).json({
+            message: "Other userid is required",
         });
+        return;
     }
-    // ❌ prevent self chat
-    if (userId === otherUserId) {
-        return res.status(400).json({
-            message: "You cannot chat with yourself",
-        });
-    }
-    // ✅ check existing chat
     const existingChat = await Chat.findOne({
         users: { $all: [userId, otherUserId], $size: 2 },
     });
     if (existingChat) {
-        return res.status(200).json({
-            message: "Chat already exists",
+        res.json({
+            message: "Chat already exitst",
             chatId: existingChat._id,
         });
+        return;
     }
-    // ✅ create chat
     const newChat = await Chat.create({
         users: [userId, otherUserId],
     });
-    return res.status(201).json({
-        message: "Chat created",
+    res.status(201).json({
+        message: "New Chat created",
         chatId: newChat._id,
     });
 });
-export const gellAllchats = TryCatch(async (req, res) => {
+export const getAllChats = TryCatch(async (req, res) => {
     const userId = req.user?._id;
     if (!userId) {
-        return res.status(400).json({
-            message: "User id is missing",
+        res.status(400).json({
+            message: " UserId missing",
         });
+        return;
     }
     const chats = await Chat.find({ users: userId }).sort({ updatedAt: -1 });
-    const chatwithUserData = await Promise.all(chats.map(async (chat) => {
-        // ✅ FIX: ObjectId comparison
-        const otherUserId = chat.users.find((id) => id.toString() !== userId.toString());
+    const chatWithUserData = await Promise.all(chats.map(async (chat) => {
+        const otherUserId = chat.users.find((id) => id !== userId);
         const unseenCount = await Messages.countDocuments({
             chatId: chat._id,
             sender: { $ne: userId },
@@ -80,13 +69,11 @@ export const gellAllchats = TryCatch(async (req, res) => {
             };
         }
     }));
-    // ✅ FIX: return response
-    return res.status(200).json({
-        success: true,
-        chats: chatwithUserData,
+    res.json({
+        chats: chatWithUserData,
     });
 });
-export const sendmessage = TryCatch(async (req, res) => {
+export const sendMessage = TryCatch(async (req, res) => {
     const senderId = req.user?._id;
     const { chatId, text } = req.body;
     const imageFile = req.file;
@@ -130,11 +117,19 @@ export const sendmessage = TryCatch(async (req, res) => {
         return;
     }
     //socket setup
+    const receiverSocketId = getRecieverSocketId(otherUserId.toString());
+    let isReceiverInChatRoom = false;
+    if (receiverSocketId) {
+        const receiverSocket = io.sockets.sockets.get(receiverSocketId);
+        if (receiverSocket && receiverSocket.rooms.has(chatId)) {
+            isReceiverInChatRoom = true;
+        }
+    }
     let messageData = {
         chatId: chatId,
         sender: senderId,
-        seen: false,
-        seenAt: undefined,
+        seen: isReceiverInChatRoom,
+        seenAt: isReceiverInChatRoom ? new Date() : undefined,
     };
     if (imageFile) {
         messageData.image = {
@@ -158,7 +153,22 @@ export const sendmessage = TryCatch(async (req, res) => {
         },
         updatedAt: new Date(),
     }, { new: true });
-    //emiting of sockets
+    //emit to sockets
+    io.to(chatId).emit("newMessage", savedMessage);
+    if (receiverSocketId) {
+        io.to(receiverSocketId).emit("newMessage", savedMessage);
+    }
+    const senderSocketId = getRecieverSocketId(senderId.toString());
+    if (senderSocketId) {
+        io.to(senderSocketId).emit("newMessage", savedMessage);
+    }
+    if (isReceiverInChatRoom && senderSocketId) {
+        io.to(senderSocketId).emit("messagesSeen", {
+            chatId: chatId,
+            seenBy: otherUserId,
+            messageIds: [savedMessage._id],
+        });
+    }
     res.status(201).json({
         message: savedMessage,
         sender: senderId,
@@ -216,17 +226,17 @@ export const getMessagesByChat = TryCatch(async (req, res) => {
             });
             return;
         }
-        //   //socket work
-        //   if (messagesToMarkSeen.length > 0) {
-        //     const otherUserSocketId = getRecieverSocketId(otherUserId.toString());
-        //     if (otherUserSocketId) {
-        //       io.to(otherUserSocketId).emit("messagesSeen", {
-        //         chatId: chatId,
-        //         seenBy: userId,
-        //         messageIds: messagesToMarkSeen.map((msg) => msg._id),
-        //       });
-        //     }
-        //   }
+        //socket work
+        if (messagesToMarkSeen.length > 0) {
+            const otherUserSocketId = getRecieverSocketId(otherUserId.toString());
+            if (otherUserSocketId) {
+                io.to(otherUserSocketId).emit("messagesSeen", {
+                    chatId: chatId,
+                    seenBy: userId,
+                    messageIds: messagesToMarkSeen.map((msg) => msg._id),
+                });
+            }
+        }
         res.json({
             messages,
             user: data,
@@ -240,4 +250,3 @@ export const getMessagesByChat = TryCatch(async (req, res) => {
         });
     }
 });
-//# sourceMappingURL=chat.js.map

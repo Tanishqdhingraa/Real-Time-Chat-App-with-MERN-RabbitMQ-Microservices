@@ -31,4 +31,3 @@ const schema = new Schema({
     timestamps: true,
 });
 export const Messages = mongoose.model("Messages", schema);
-//# sourceMappingURL=Messages.js.map

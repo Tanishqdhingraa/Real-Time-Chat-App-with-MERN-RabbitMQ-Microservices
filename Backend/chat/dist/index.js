@@ -1,17 +1,15 @@
-import express from 'express';
+import express from "express";
 import dotenv from "dotenv";
-import { connectDb } from './config/db.js';
+import connectDb from "./config/db.js";
 import chatRoutes from "./routes/chat.js";
-const app = express();
+import cors from "cors";
+import { app, server } from "./config/socket.js";
 dotenv.config();
 connectDb();
 app.use(express.json());
+app.use(cors());
 app.use("/api/v1", chatRoutes);
-app.get("/", (req, res) => {
-    res.json(" HELLLO FROM CHAT PORT ");
+const port = process.env.PORT;
+server.listen(port, () => {
+    console.log(`✅  Server is running on port ${port}`);
 });
-const port = process.env.PORT || 8001;
-app.listen(port, () => {
-    console.log(`😎  Chat services is running on http://localhost:${port} `);
-});
-//# sourceMappingURL=index.js.map

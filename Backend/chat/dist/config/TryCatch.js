@@ -11,4 +11,3 @@ const TryCatch = (handler) => {
     };
 };
 export default TryCatch;
-//# sourceMappingURL=TryCatch.js.map

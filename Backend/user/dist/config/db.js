@@ -1,19 +1,18 @@
 import mongoose from "mongoose";
-export const connectDb = async () => {
-    const url = process.env.MONGO_URL;
+const connectDb = async () => {
+    const url = process.env.MONGO_URI;
     if (!url) {
-        console.log("URL is not found");
-        return;
+        throw new Error("MONGO_URI is not defined in enviroment variables");
     }
     try {
         await mongoose.connect(url, {
-            dbName: "CHAT-APPLICATION"
+            dbName: "Chatappmicroserviceapp",
         });
-        console.log("😘 Connected to database");
+        console.log("Connected to mongodb");
     }
     catch (error) {
-        console.log("some error in database connection");
+        console.error("Failed to connect to Mongodb", error);
         process.exit(1);
     }
 };
-//# sourceMappingURL=db.js.map
+export default connectDb;

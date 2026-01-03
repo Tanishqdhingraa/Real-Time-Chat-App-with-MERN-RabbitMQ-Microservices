@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema } from "mongoose";
 const schema = new Schema({
     name: {
         type: String,
@@ -7,10 +7,9 @@ const schema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
     },
 }, {
-    timestamps: true
+    timestamps: true,
 });
 export const User = mongoose.model("User", schema);
-//# sourceMappingURL=User.js.map
